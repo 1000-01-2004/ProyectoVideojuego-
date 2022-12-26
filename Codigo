@@ -2,8 +2,6 @@
 #include <windows.h>
 #include <conio.h>
 #include <time.h>
-#include<stdlib.h>
-#include<string.h>
 #define WIDTH 780
 #define HEIGHT 150
 #define dW 10
@@ -209,7 +207,7 @@ public:
     void text()
     {
         gotoxy(WIDTH / dW + 5, 2);
-        printf("CRAZY BIRDS");
+        printf("PATO VOLADOR");
         gotoxy(WIDTH / dW + 6, 4);
         printf("----------");
         gotoxy(WIDTH / dW + 6, 6);
@@ -302,7 +300,7 @@ public:
         gotoxy(10, 6);
         printf("--------------------------");
         gotoxy(10, 7);
-        printf("--Choose your character--");
+        printf("-- Elige a tu personaje--");
         gotoxy(10, 8);
         printf("--------------------------");
         gotoxy(10, 9);
