@@ -1,1 +1,368 @@
-#include<iostream>
+#include <stdio.h>
+#include <windows.h>
+#include <conio.h>
+#include <time.h>
+#define WIDTH 780
+#define HEIGHT 150
+#define dW 10
+#define dH 5
+
+using namespace std;
+struct coord
+{
+    int x;
+    int y;
+};
+
+struct dato
+{
+    coord pos[13];
+    char d[13];
+};
+
+char bird[4][2][8] = {
+    {"/--o\\  ",
+     "|___ > "},
+    {" _(.)< ",
+     "\\___)  "},
+    {"  (o<  ",
+     "  / )  "},
+    {"(o,o)  ",
+     "{'''}  "}};
+
+void gotoxy(int x, int y)
+{
+    HANDLE hcon = GetStdHandle(STD_OUTPUT_HANDLE);
+    COORD dwPos;
+    dwPos.X = x;
+    dwPos.Y = y;
+    SetConsoleCursorPosition(hcon, dwPos);
+}
+
+void draw(char plano[HEIGHT / dH][WIDTH / dW + 1], int A, int B, char c)
+{
+    B = HEIGHT / dH - 1 - B;
+    if (A < 0 || B < 0 || A >= WIDTH / dW || B >= HEIGHT / dH)
+        return;
+    plano[B][A] = c;
+}
+
+class flappybird
+{
+private:
+    dato ave[4];
+    dato Bchoque;
+    int t1[3], t2[3], d[3] = {0, 0, 0};
+    int x1[3], o[3] = {26, 52, 78};
+    int CA[4] = {10, 10, 5, 10};
+    float y = 15.0f, vy = 0.0f;
+    int c = 3, op = 0, score = 0;
+    bool GO[3] = {false, false, false}; // En donde se activa la colision
+
+public:
+    void info()
+    {
+        for (int t = 0; t < 4; t++)
+        {
+            int q = 0;
+            int y;
+            for (int i = 0; i < 2; i++)
+            {
+                y = 2 - i;
+                for (int j = 0; j < 7; j++)
+                {
+                    if (bird[t][i][j] != ' ')
+                    {
+                        ave[t].pos[q] = {j, y};
+                        ave[t].d[q] = bird[t][i][j];
+                        q++;
+                    }
+                }
+            }
+        }
+    }
+    void player(char plano[HEIGHT / dH][WIDTH / dW + 1])
+    {
+        for (int i = 0; i < CA[c]; i++)
+        {
+            draw(plano, 5 + ave[c].pos[i].x, y + ave[c].pos[i].y, ave[c].d[i]); // c es la variable que utilizamos para cambiar de personaje
+            Bchoque.pos[i].y = y + ave[c].pos[i].y;
+        }
+    }
+    void pipelinerand(int pos) // Funcion de tubos
+    {
+        t1[pos] = rand() % 19 + 3;
+        t2[pos] = HEIGHT / dH - (t1[pos] + 5);
+    }
+    void pipeline(char plano[HEIGHT / dH][WIDTH / dW + 1], int pos)
+    {
+        for (int i = 0; i < t1[pos]; i++)
+        {
+            draw(plano, x1[pos] - 1, 0 + i, '*'); // 0 representa el valor de la zona inferior
+            draw(plano, x1[pos], 0 + i, '*');
+            draw(plano, x1[pos] + 1, 0 + i, '*');
+        }
+        for (int j = 0; j < t2[pos]; j++)
+        {
+            draw(plano, x1[pos] - 1, HEIGHT / dH - 1 - j, '*');
+            draw(plano, x1[pos], HEIGHT / dH - 1 - j, '*');
+            draw(plano, x1[pos] + 1, HEIGHT / dH - 1 - j, '*');
+        }
+    }
+    void displacement(int pos)
+    {
+        d[pos]++;
+        if (d[pos] == 230) // Hara que el desplazamiento sea cada 25 while y el desplazamiento no sea tan rápido
+        {
+            x1[pos]--;
+            d[pos] = 0;
+        }
+        if (x1[pos] <= 0)
+        {
+            x1[pos] = WIDTH / dW;
+            pipelinerand(pos);
+        }
+        if (x1[pos] >= 5 && x1[pos] <= 10)
+            GO[pos] = true;
+        else
+            GO[pos] = false;
+        if (x1[pos] == 3)
+        {
+            score++;
+        }
+    }
+    void update()
+    {
+        vy -= 0.021;
+        y += 0.00615 * vy;
+
+        gotoxy(WIDTH / dW + 14, 5);
+        printf("%d", score);
+    }
+    void movement()
+    {
+        if (vy <= 0)
+            vy = 1.0;
+    }
+    int collision(int pos)
+    {
+        if (GO[pos])
+        {
+            for (int i = 0; i < CA[c]; i++)
+            {
+                if (Bchoque.pos[i].y < t1[pos] || Bchoque.pos[i].y > (t1[pos] + 5))
+
+                return 1;
+            }
+        }
+        else
+        {
+            for (int i = 0; i < CA[c]; i++)
+            {
+                if (Bchoque.pos[i].y < 0 || Bchoque.pos[i].y > HEIGHT / dH)
+                    return 1;
+            }
+        }
+    }
+    void menu()
+    {
+        system("cls");
+        gotoxy(10, 5);
+        printf("--------------------------");
+        gotoxy(10, 6);
+        printf("|       PATOVOLADOR       |");
+        gotoxy(10, 7);
+        printf("--------------------------");
+        gotoxy(10, 8);
+        printf("1. Iniciar partida");
+        gotoxy(10, 9);
+        printf("2. Escoger diseño");
+        gotoxy(10, 10);
+        printf("3. Salir");
+        gotoxy(10, 12);
+        printf("Escoger opcion: ");
+        char op1 = getche();
+
+        if (op1 == '1')
+        {
+            op = 1;
+            y = 15.0f;
+            vy = 0;
+            score = 0;
+            for (int j = 0; j < 3; j++)
+            {
+                d[j] = 0;
+                x1[j] = o[j];
+                pipelinerand(j); // Generara nuevas posiciones para las tuberias
+            }
+        }
+        else if (op1 == '2')
+            op = 2;
+        else if (op1 == '3')
+            op = 3;
+        else if (op1 == '4')
+            exit(0);
+    }
+
+    void text()
+    {
+        gotoxy(WIDTH / dW + 5, 2);
+        printf("CRAZY BIRDS");
+        gotoxy(WIDTH / dW + 6, 4);
+        printf("----------");
+        gotoxy(WIDTH / dW + 6, 6);
+        printf("----------");
+        gotoxy(WIDTH / dW + 7, 12);
+        printf("Control");
+        gotoxy(WIDTH / dW + 7, 13);
+        printf("----------");
+        gotoxy(WIDTH / dW + 2, 14);
+        printf("Spacebar = Jump");
+        gotoxy(WIDTH / dW + 7, 5);
+        printf("Score: ");
+    }
+
+    void game(char plano[HEIGHT / dH][WIDTH / dW + 1])
+    {
+        bool game = true;
+        float fps = 24.0f;
+        float dt = 1.0f / fps;
+        float acumulador = 0;
+        clock_t inicio = clock(); // Tiempo de procesamiento
+        text();
+
+        while (game)
+        {
+            clock_t final = clock();
+            acumulador += float(final - inicio) / CLOCKS_PER_SEC;
+            inicio = final;
+            if (acumulador >= 0.2f)
+                acumulador = 2.0f;
+
+            while (acumulador >= dt)
+            {
+                if (GetKeyState(VK_SPACE) & 0x8000)
+                {
+                    movement();
+                }
+                if (GetKeyState(VK_ESCAPE) & 0x8000)
+                {
+                    game = false;
+                    op = 0;
+                }
+                acumulador -= dt;
+            }
+
+            for (int i = 0; i < HEIGHT / dH; i++)
+            {
+                for (int j = 0; j < WIDTH / dW; j++)
+                {
+                    plano[i][j] = ' ';
+                }
+            }
+            update();
+            player(plano);
+            for (int i = 0; i < 3; i++)
+            {
+                pipeline(plano, i);
+                displacement(i);
+                if (collision(i) == 1)
+                {
+                    op = 3;
+                    game = false;
+                }
+            }
+
+            gotoxy(0, 0);
+            puts(plano[0]);
+        }
+    }
+
+    void gameover()
+    {
+        system("cls");
+        gotoxy(10, 5);
+        printf("End");
+        gotoxy(10, 6);
+        printf("--------------------------");
+        gotoxy(10, 7);
+        printf("--------GAME OVER---------");
+        gotoxy(10, 8);
+        printf("--------------------------");
+        Sleep(1200);
+        op = 0;
+    }
+
+
+    void characters()
+    {
+        system("cls");
+        gotoxy(10, 6);
+        printf("--------------------------");
+        gotoxy(10, 7);
+        printf("--Choose your character--");
+        gotoxy(10, 8);
+        printf("--------------------------");
+        gotoxy(10, 9);
+        printf("   -1    -2    -3    -4   ");
+        for (int t = 0; t < 4; t++)
+        {
+            for (int i = 0; i < 2; i++)
+            {
+                
+                for (int j = 0; j < 7; j++)
+                {
+                    gotoxy(10 + j + (t * 7), 11 + i);
+                    printf(&bird[t][i][j]);
+                }
+            }
+        }
+        char op1 = getche();
+        if (op1 == '1')
+            c = 0;
+        else if (op1 == '2')
+            c = 1;
+        else if (op1 == '3')
+            c = 2;
+        else if (op1 == '4')
+            c = 3;
+        op = 0;
+    }
+
+    void play(char plano[HEIGHT / dH][WIDTH / dW + 1])
+    {
+        info();
+        do
+        {
+            switch (op)
+            {
+            case 0:
+                menu();
+                break;
+            case 1:
+                game(plano);
+                break;
+            case 2:
+                characters();
+                break;
+            case 3:
+                gameover();
+                break;
+            default:;
+                break;
+            }
+        } while (true);
+    };
+};
+main()
+{
+    srand(static_cast<unsigned>(time(0))); // Función para sustituir srand por rand
+    char plano[HEIGHT / dH][WIDTH / dW + 1];
+    for (int i = 0; i < HEIGHT / dH; i++)
+        plano[i][WIDTH / dW] = '\n';
+    plano[HEIGHT / dH + 1][WIDTH / dW] = '\o';
+    flappybird j1;
+    j1.play(plano);
+
+    return 0;
+}
