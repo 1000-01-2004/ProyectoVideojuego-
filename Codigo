@@ -2,6 +2,8 @@
 #include <windows.h>
 #include <conio.h>
 #include <time.h>
+#include<stdlib.h>
+#include<string.h>
 #define WIDTH 780
 #define HEIGHT 150
 #define dW 10
