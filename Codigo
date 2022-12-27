@@ -112,7 +112,7 @@ public:
     void displacement(int pos)
     {
         d[pos]++;
-        if (d[pos] == 230) // Hara que el desplazamiento sea cada 25 while y el desplazamiento no sea tan rápido
+        if (d[pos] == 25) // Hara que el desplazamiento sea cada 25 while y el desplazamiento no sea tan rápido
         {
             x1[pos]--;
             d[pos] = 0;
@@ -134,7 +134,7 @@ public:
     void update()
     {
         vy -= 0.021;
-        y += 0.00615 * vy;
+        y += 0.0415 * vy;
 
         gotoxy(WIDTH / dW + 14, 5);
         printf("%d", score);
@@ -142,7 +142,7 @@ public:
     void movement()
     {
         if (vy <= 0)
-            vy = 1.0;
+            vy = 1.75;
     }
     int collision(int pos)
     {
@@ -170,13 +170,13 @@ public:
         gotoxy(10, 5);
         printf("--------------------------");
         gotoxy(10, 6);
-        printf("|       PATOVOLADOR       |");
+        printf("|       PATO VOLADOR      |");
         gotoxy(10, 7);
         printf("--------------------------");
         gotoxy(10, 8);
         printf("1. Iniciar partida");
         gotoxy(10, 9);
-        printf("2. Escoger diseño");
+        printf("2. Elige a tu personaje");
         gotoxy(10, 10);
         printf("3. Salir");
         gotoxy(10, 12);
@@ -281,8 +281,6 @@ public:
     void gameover()
     {
         system("cls");
-        gotoxy(10, 5);
-        printf("End");
         gotoxy(10, 6);
         printf("--------------------------");
         gotoxy(10, 7);
